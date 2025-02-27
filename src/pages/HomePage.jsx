@@ -1,14 +1,59 @@
 import { Button, Card, Paper, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import React from 'react';
+import Grid from '@mui/material/Grid2';
+import React, { useEffect } from 'react';
+import { ContenidoComida } from './ContenidoComida';
 
 export const HomePage = () => {
+
+    const [textobuscar, setTextoB] = React.useState('')
+
+    const [datos, setDatos] = React.useState(
+        { meals: [] }
+    )
+
+    const obtenercomidanombre = async () => {
+        const buscar = textobuscar.trim()
+        if (textobuscar == "") {
+            alert("Campo vacio, escribe ago")
+        } else {
+            const requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
+
+            try {
+                const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${buscar}`, requestOptions);
+                const result = await response.json();
+                setDatos(result)
+                console.log(result)
+            } catch (error) {
+                console.error(error);
+            };
+
+        }
+    }
+
+    React.useEffect(() => {
+        const obtenerdata = async () => {
+            try {
+                const response = await fetch('https://www.themealdb.com/api/json/v1/1/search.php?s=beef');
+                const result = await response.json();
+                setDatos(result);
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+            }
+        };
+        obtenerdata();
+    }, []);
+    console.log("Contenido input", textobuscar)
+
     return (
         <div>
             <br />
-            <Grid container spacing={2} padding={4} justifyContent="center" alignItems="center">
-                <Grid item xs={12} md={8}>
+            <Grid container spacing={2} padding={4} xs={{ justifyContent: "center", alignItems: "center" }}>
+                <Grid size={{ xs: 8, md: 8 }}>
                     <TextField
+                        onChange={e => setTextoB(e.target.value)}
                         label="Nombre de la comida"
                         variant="outlined"
                         fullWidth
@@ -21,6 +66,7 @@ export const HomePage = () => {
                 </Grid>
                 <Grid item xs={12} md={4} display="flex" justifyContent="center">
                     <Button
+                        onClick={obtenercomidanombre}
                         variant="contained"
                         sx={{
                             padding: "10px 20px",
@@ -34,15 +80,13 @@ export const HomePage = () => {
                 </Grid>
             </Grid>
 
-            <Grid container spacing={2} padding={2}>
-                {[...Array(3)].map((_, index) => (
-                    <Grid item xs={12} md={4} key={index}>
-                        <Paper elevation={3} sx={{ padding: 2, borderRadius: 2 }}>
-                            Hola Pedro Pony
-                        </Paper>
-                    </Grid>
-                ))}
-            </Grid>
+            <ContenidoComida
+                data={datos.meals}
+            />
+
+
+
+
         </div>
     );
 };
